@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Пересчет лабораторных единиц крови и витаминов</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .converter-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .result-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 25px;
+            color: white;
+            display: none;
+        }
+        
+        .result-card.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .result-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            opacity: 0.9;
+        }
+        
+        .result-value {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .result-formula {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .error-message {
+            background: #fee;
+            color: #c00;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        .info-table {
+            margin-top: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            overflow-x: auto;
+        }
+        
+        .info-table h3 {
+            padding: 20px 20px 0 20px;
+            color: #333;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 13px;
+        }
+        
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background: #f0f0f0;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+            
+            .result-value {
+                font-size: 28px;
+            }
+            
+            th, td {
+                padding: 8px 10px;
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Пересчет лабораторных единиц</h1>
+            <p>Конвертация показателей крови и витаминов между разными системами измерения</p>
+        </div>
+        
+        <div class="content">
+            <div class="converter-card">
+                <div class="form-group">
+                    <label>📊 Выберите показатель</label>
+                    <select id="testSelect">
+                        {% for test in tests %}
+                        <option value="{{ test }}">{{ test }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>🔢 Введите значение</label>
+                    <input type="number" id="valueInput" step="any" placeholder="Например: 95.5">
+                </div>
+                
+                <button onclick="convert()">🔄 Перевести</button>
+            </div>
+            
+            <div id="resultCard" class="result-card">
+                <div class="result-title">Результат пересчета</div>
+                <div class="result-value" id="resultText">—</div>
+                <div class="result-formula" id="formulaText"></div>
+            </div>
+            
+            <div id="errorMessage" class="error-message"></div>
+            
+            <div class="info-table">
+                <h3>📋 Справочная таблица коэффициентов пересчета</h3>
+                <table>
+                    <thead>
+                        <tr><th>Показатель</th><th>Исходная ед.</th><th>Целевая ед.</th><th>Коэффициент</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for test_name, data in conversion_data.items() %}
+                        <tr>
+                            <td>{{ test_name }}</td>
+                            <td>{{ data.unit1 }}</td>
+                            <td>{{ data.unit2 }}</td>
+                            <td>{{ data.factor }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Данные носят справочный характер. Всегда консультируйтесь с врачом для интерпретации результатов анализов.</p>
+        </div>
+    </div>
+    
+    <script>
+        async function convert() {
+            const testSelect = document.getElementById('testSelect');
+            const valueInput = document.getElementById('valueInput');
+            const resultCard = document.getElementById('resultCard');
+            const errorMessage = document.getElementById('errorMessage');
+            const resultText = document.getElementById('resultText');
+            const formulaText = document.getElementById('formulaText');
+            
+            const test_name = testSelect.value;
+            const value = valueInput.value;
+            
+            // Скрываем предыдущие результаты и ошибки
+            resultCard.classList.remove('show');
+            errorMessage.classList.remove('show');
+            
+            // Проверка на пустые поля
+            if (!test_name || !value) {
+                showError('Пожалуйста, заполните все поля');
+                return;
+            }
+            
+            try {
+                const formData = new FormData();
+                formData.append('test_name', test_name);
+                formData.append('value', value);
+                
+                const response = await fetch('/convert', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Отображаем результат
+                    resultText.innerHTML = `${data.converted_value} ${data.converted_unit}`;
+                    formulaText.innerHTML = `Формула: ${data.formula}<br>Исходное значение: ${data.original_value} ${data.original_unit}`;
+                    resultCard.classList.add('show');
+                } else {
+                    showError(data.error);
+                }
+            } catch (error) {
+                showError('Ошибка соединения с сервером');
+            }
+        }
+        
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.innerHTML = message;
+            errorMessage.classList.add('show');
+        }
+        
+        // Обработка нажатия Enter в поле ввода
+        document.getElementById('valueInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                convert();
+            }
+        });
+    </script>
+</body>
+</html>
